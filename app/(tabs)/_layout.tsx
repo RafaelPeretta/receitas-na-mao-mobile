@@ -1,33 +1,60 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons'; // Usaremos ícones
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
+    // Configura o 'Tabs' (Bottom Tab Navigator)
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+      screenOptions={({ route }) => ({
+        // Define a cor dos ícones e texto
+        tabBarActiveTintColor: '#003366', // Nosso azul
+        tabBarInactiveTintColor: 'gray',
+        
+        // Define o ícone com base no nome da rota
+        tabBarIcon: ({ color, size, focused }) => {
+          let iconName: any;
+
+          // Os nomes aqui correspondem aos nomes dos ARQUIVOS dentro de app/(tabs)/
+          if (route.name === 'index') { 
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'busca') {
+            iconName = focused ? 'search' : 'search-outline';
+          } else if (route.name === 'meu-livro') {
+            iconName = focused ? 'book' : 'book-outline';
+          }
+
+          // Fallback icon if needed
+          if (!iconName) {
+            iconName = 'help-circle-outline'; 
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
+    >
+      {/* 1ª Aba: Home */}
       <Tabs.Screen
-        name="index"
+        name="index" // Nome do arquivo: app/(tabs)/index.tsx
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Início',
+          headerShown: false, // Esconde o header padrão da aba
         }}
       />
+      {/* 2ª Aba: Busca */}
       <Tabs.Screen
-        name="explore"
+        name="busca" // Nome do arquivo: app/(tabs)/busca.tsx
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Buscar Receitas',
+          headerShown: false,
+        }}
+      />
+      {/* 3ª Aba: Meu Livro */}
+      <Tabs.Screen
+        name="meu-livro" // Nome do arquivo: app/(tabs)/meu-livro.tsx
+        options={{
+          title: 'Meu Livro',
+          headerShown: false,
         }}
       />
     </Tabs>
