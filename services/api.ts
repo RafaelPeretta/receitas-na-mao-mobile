@@ -6,7 +6,7 @@ const API_URL = 'https://www.themealdb.com/api/json/v1/1';
 /**
  * Busca receitas na API usando um termo de descrição.
  * @param {string} termo - O termo a ser buscado (ex: "Feijoada", "Chicken").
- * @returns {Promise<Array<any>>} - Uma promessa que resolve para um array de receitas.
+ * @returns {Promise<any[]>} - Uma promessa que resolve para um array de receitas.
  */
 export const buscarReceitasPorDescricao = async (termo: string): Promise<any[]> => {
   if (!termo || termo.trim() === '') {
@@ -35,9 +35,10 @@ export const buscarReceitasPorDescricao = async (termo: string): Promise<any[]> 
 };
 
 /**
- * Busca uma receita aleatória
+ * Busca UMA receita aleatória
+ * @returns {Promise<any | null>} - Uma promessa que resolve para um objeto de receita ou null.
  */
-export const buscarReceitaAleatoria = async (): Promise<any[]> => {
+export const buscarReceitaAleatoria = async (): Promise<any | null> => {
   const url = `${API_URL}/random.php`;
 
   try {
@@ -48,10 +49,12 @@ export const buscarReceitaAleatoria = async (): Promise<any[]> => {
     }
 
     const data = await response.json();
-    return data.meals || [];
+    
+    // Retorna APENAS o primeiro objeto da receita, ou null
+    return data.meals && data.meals.length > 0 ? data.meals[0] : null;
 
   } catch (error) {
     console.error("Falha ao buscar receita aleatória:", error);
-    return [];
+    return null;
   }
 };

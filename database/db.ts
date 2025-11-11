@@ -11,20 +11,16 @@ export interface Receita {
   urlOriginal: string;
 }
 
-// Variável para armazenar a instância do banco de dados
 let db: SQLite.SQLiteDatabase | null = null;
 
 /**
- * Inicializa o banco de dados e cria a tabela 'receitas'.
- * Usa a nova API openDatabaseAsync.
+ * Inicializa o banco de dados
  */
 export const initDb = async (): Promise<void> => {
   try {
-    // 1. Usa o novo 'openDatabaseAsync'
     db = await SQLite.openDatabaseAsync('receitas.db');
     console.log('Banco de dados aberto com sucesso (Mobile).');
 
-    // 2. Executa o SQL de criação da tabela (não precisa de 'transaction' para isso)
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS receitas (
         id TEXT PRIMARY KEY NOT NULL,
@@ -49,8 +45,7 @@ export const salvarReceita = async (receitaAPI: any): Promise<void> => {
   if (!db) throw new Error("Banco de dados não inicializado.");
 
   try {
-    // A nova API usa 'runAsync' para INSERT/UPDATE/DELETE
-    const result = await db.runAsync(
+    await db.runAsync(
       `INSERT INTO receitas (id, nome, imagemUrl, categoria, instrucoes, urlOriginal)
        VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
@@ -59,7 +54,7 @@ export const salvarReceita = async (receitaAPI: any): Promise<void> => {
          categoria=excluded.categoria,
          instrucoes=excluded.instrucoes,
          urlOriginal=excluded.urlOriginal;`,
-      [ // Os parâmetros
+      [ 
         receitaAPI.idMeal,
         receitaAPI.strMeal,
         receitaAPI.strMealThumb,
@@ -68,8 +63,7 @@ export const salvarReceita = async (receitaAPI: any): Promise<void> => {
         receitaAPI.strSource
       ]
     );
-
-    console.log(`Receita "${receitaAPI.strMeal}" salva com sucesso! ID: ${result.lastInsertRowId}, Alterações: ${result.changes}`);
+    console.log(`Receita "${receitaAPI.strMeal}" salva com sucesso!`);
   } catch (error) {
     console.error('Erro ao salvar receita (Mobile):', error);
   }
@@ -82,9 +76,7 @@ export const getReceitasSalvas = async (): Promise<Receita[]> => {
   if (!db) throw new Error("Banco de dados não inicializado.");
 
   try {
-    // A nova API usa 'getAllAsync' para SELECT que retorna múltiplos resultados
     const receitas = await db.getAllAsync<Receita>("SELECT * FROM receitas;");
-    
     console.log("Receitas lidas do banco (Mobile):", receitas);
     return receitas;
   } catch (error) {
@@ -100,10 +92,45 @@ export const deletarReceita = async (id: string): Promise<void> => {
   if (!db) throw new Error("Banco de dados não inicializado.");
 
   try {
-    // Usa 'runAsync' para DELETE
     await db.runAsync("DELETE FROM receitas WHERE id = ?;", [id]);
     console.log(`Receita com ID "${id}" deletada com sucesso (Mobile)!`);
   } catch (error) {
     console.error('Erro ao deletar receita (Mobile):', error);
+  }
+};
+
+// **** NOVA FUNÇÃO (READ por ID) ****
+/**
+ * (READ) Busca UMA receita salva pelo ID.
+ */
+export const getReceitaPorId = async (id: string): Promise<Receita | null> => {
+  if (!db) throw new Error("Banco de dados não inicializado.");
+
+  try {
+    // Usa 'getFirstAsync' para retornar um único objeto
+    const receita = await db.getFirstAsync<Receita>("SELECT * FROM receitas WHERE id = ?", [id]);
+    console.log(`Receita com ID "${id}" lida do banco:`, receita);
+    return receita || null;
+  } catch (error) {
+    console.error('Erro ao ler receita por ID (Mobile):', error);
+    return null;
+  }
+};
+
+// **** NOVA FUNÇÃO (UPDATE) ****
+/**
+ * (UPDATE) Atualiza uma receita no banco de dados.
+ */
+export const updateReceita = async (id: string, nome: string, instrucoes: string): Promise<void> => {
+  if (!db) throw new Error("Banco de dados não inicializado.");
+
+  try {
+    await db.runAsync(
+      "UPDATE receitas SET nome = ?, instrucoes = ? WHERE id = ?", 
+      [nome, instrucoes, id]
+    );
+    console.log(`Receita com ID "${id}" atualizada com sucesso (Mobile)!`);
+  } catch (error) {
+    console.error('Erro ao atualizar receita (Mobile):', error);
   }
 };

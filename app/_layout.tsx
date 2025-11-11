@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { initDb } from '../database/db'; 
-import Toast from 'react-native-toast-message'; // 1. IMPORTAR O TOAST
+import Toast from 'react-native-toast-message';
 
 export default function RootLayout() {
 
@@ -11,7 +11,6 @@ export default function RootLayout() {
   }, []); 
 
   return (
-    // Usamos um Fragment <> para ter o Stack e o Toast como "irmãos"
     <>
       <Stack>
         <Stack.Screen 
@@ -21,11 +20,18 @@ export default function RootLayout() {
         <Stack.Screen 
           name="modal" 
           options={{ presentation: 'modal' }} 
-        /> 
+        />
+        
+        {/* **** NOVA TELA DE EDIÇÃO **** */}
+        <Stack.Screen
+          name="editar" // Corresponde ao arquivo /app/editar.tsx
+          options={{ 
+            presentation: 'modal', // Abre como um modal por cima
+            title: 'Editar Receita' // Título no header
+          }}
+        />
       </Stack>
       
-      {/* 2. ADICIONAR O COMPONENTE TOAST AQUI */}
-      {/* Ele ficará flutuando sobre todo o app */}
       <Toast />
     </>
   );

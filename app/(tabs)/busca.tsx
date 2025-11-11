@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
-import { 
-  View, Text, TextInput, Button, FlatList, Image, 
-  ActivityIndicator, StyleSheet, SafeAreaView, Alert 
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  FlatList,
+  Image,
+  StyleSheet,
+  SafeAreaView,
+  Alert
 } from 'react-native';
-import { buscarReceitasPorDescricao } from '../../services/api'; 
-import { salvarReceita } from '../../database/db'; 
-import Toast from 'react-native-toast-message'; // 1. IMPORTAR O TOAST
+
+// Importa nossas funções de API e DB
+import { buscarReceitasPorDescricao } from '../../services/api';
+import { salvarReceita } from '../../database/db';
+import Toast from 'react-native-toast-message';
+
+// 1. IMPORTAR O NOVO SPINNER
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function BuscaScreen() {
   const [termo, setTermo] = useState('');
-  const [receitas, setReceitas] = useState<any[]>([]); 
+  const [receitas, setReceitas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mensagem, setMensagem] = useState('');
 
+  // ... (handleBuscar e handleSalvarReceita continuam os mesmos) ...
   const handleBuscar = async () => {
-    // ... (função de busca continua a mesma) ...
     if (termo.trim() === '') return;
     setIsLoading(true);
     setReceitas([]);
@@ -38,83 +50,97 @@ export default function BuscaScreen() {
     console.log("Salvando receita (Mobile):", receitaAPI.strMeal);
     try {
       await salvarReceita(receitaAPI);
-      
-      // 2. SUBSTITUIR O 'Alert' por 'Toast'
       Toast.show({
-        type: 'success', // Tipo de toast (verde)
+        type: 'success',
         text1: 'Sucesso!',
         text2: `Receita "${receitaAPI.strMeal}" salva no seu Livro!`
       });
-
     } catch (error) {
       console.error("Erro ao salvar (Tela Busca):", error);
-      
-      // Para erros, o Alert ainda é uma boa opção
-      Alert.alert('Erro', 'Não foi possível salvar a receita.'); 
-      
-      // Ou podemos usar um toast de erro:
-      // Toast.show({
-      //   type: 'error',
-      //   text1: 'Erro',
-      //   text2: 'Não foi possível salvar a receita.'
-      // });
+      Alert.alert('Erro', 'Não foi possível salvar a receita.');
     }
   };
 
-  // ... (função renderReceitaCard e o return) ...
-  // (Nenhuma mudança necessária no resto do arquivo)
   const renderReceitaCard = ({ item }: { item: any }) => (
     <View style={styles.receitaCard}>
-      <Image 
-        source={{ uri: item.strMealThumb }} 
-        style={styles.receitaImagem} 
+      <Image
+        source={{ uri: item.strMealThumb }}
+        style={styles.receitaImagem}
       />
       <Text style={styles.receitaTitulo}>{item.strMeal}</Text>
       <Text style={styles.receitaIngredientes}>
         Ingredientes: {item.strIngredient1}, {item.strIngredient2}, {item.strIngredient3}...
       </Text>
       <View style={styles.buttonContainer}>
-          <Button 
-            title="Salvar no meu Livro" 
+          <Button
+            title="Salvar no meu Livro"
             onPress={() => handleSalvarReceita(item)}
-            color="#99CC33" 
+            color="#99CC33" // Verde limão
           />
       </View>
     </View>
   );
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Buscar Receitas</Text>
-        <View style={styles.inputContainer}>
-          <TextInput 
-            style={styles.input}
-            placeholder="Digite o nome do prato (ex: Chicken)"
-            value={termo}
-            onChangeText={setTermo}
-          />
-          <Button 
-            title={isLoading ? 'Buscando...' : 'Buscar'}
-            onPress={handleBuscar} 
-            disabled={isLoading}
-            color="#003366" 
-          />
+  // 2. FUNÇÃO PARA RENDERIZAR O CONTEÚDO PRINCIPAL
+  const renderContent = () => {
+    // Se estiver carregando, mostra o spinner
+    if (isLoading) {
+      return <LoadingSpinner message="Buscando receitas..." />;
+    }
+
+    // Se tiver mensagem (ex: "Nenhum resultado"), mostra o estado vazio
+    if (mensagem) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>{mensagem}</Text>
         </View>
-        {isLoading && <ActivityIndicator size="large" color="#003366" style={{ marginVertical: 20 }} />}
-        {mensagem && !isLoading && <Text style={styles.mensagem}>{mensagem}</Text>}
+      );
+    }
+
+    // Se tiver receitas, mostra a lista
+    if (receitas.length > 0) {
+      return (
         <FlatList
           data={receitas}
           renderItem={renderReceitaCard}
           keyExtractor={(item) => item.idMeal}
           style={styles.list}
         />
+      );
+    }
+
+    // Se não tiver buscado nada ainda, não mostra nada
+    return null;
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Buscar Receitas</Text>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite o nome do prato (ex: Chicken)"
+            value={termo}
+            onChangeText={setTermo}
+          />
+          <Button
+            title={isLoading ? 'Buscando...' : 'Buscar'}
+            onPress={handleBuscar}
+            disabled={isLoading}
+            color="#003366" // Azul
+          />
+        </View>
+        
+        {/* 3. CHAMA A FUNÇÃO DE RENDERIZAÇÃO */}
+        {renderContent()}
       </View>
     </SafeAreaView>
   );
 }
 
-// Estilos
+// 4. Estilos (Adiciona 'emptyContainer' e 'emptyText')
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -145,11 +171,19 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
   },
-  mensagem: {
+  // Renomeado de 'mensagem' para 'emptyText'
+  emptyText: {
     textAlign: 'center',
     fontStyle: 'italic',
+    fontSize: 16,
     color: '#555',
-    marginTop: 20,
+  },
+  // Novo container para centralizar a mensagem
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   list: {
     marginTop: 10,
