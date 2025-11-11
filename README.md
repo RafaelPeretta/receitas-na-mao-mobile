@@ -1,53 +1,45 @@
-> Edited for use in IDX on 07/09/12
+# Projeto: Receitas na Mão (Plataforma Mobile)
 
-# Welcome to your Expo app 👋
+Este é o componente Mobile do projeto de conclusão da disciplina de "Desenvolvimento Web e Mobile", construído com **React Native e Expo**.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 🚀 Sobre o Projeto
 
-## Get started
+"Receitas na Mão" é um assistente de culinária nativo para iOS e Android. Ele permite ao usuário descobrir receitas (com uma funcionalidade de "Receita do Dia" na Home), buscar pratos específicos, e gerenciar seu livro de receitas pessoal diretamente no dispositivo.
 
-#### Android
+---
 
-Android previews are defined as a `workspace.onStart` hook and started as a vscode task when the workspace is opened/started.
+## ✨ Funcionalidades Implementadas
 
-Note, if you can't find the task, either:
-- Rebuild the environment (using command palette: `IDX: Rebuild Environment`), or
-- Run `npm run android -- --tunnel` command manually run android and see the output in your terminal. The device should pick up this new command and switch to start displaying the output from it.
+O projeto cumpre todos os requisitos técnicos obrigatórios da disciplina:
 
-In the output of this command/task, you'll find options to open the app in a
+* **Consumo de API Externa:** A aba "Buscar Receitas" consome a API `TheMealDB`. A tela "Início" também consome a API para buscar uma "Receita do Dia" aleatória.
+* **Banco de Dados Local (CRUD Completo):** O aplicativo utiliza **SQLite** (via `expo-sqlite`) para persistência de dados nativa no dispositivo.
+    * **Create:** Salvar receitas da API no livro local.
+    * **Read:** Exibir as receitas salvas na aba "Meu Livro".
+    * **Update:** Editar o nome e as instruções de uma receita salva (em uma tela modal de edição).
+    * **Delete:** Remover receitas do livro com confirmação.
+* **Navegação Multi-telas (Abas):** O projeto utiliza **Expo Router** (construído sobre React Navigation) para implementar uma navegação por Abas Inferiores (Bottom Tab Navigator) com 3 telas: Início, Busca e Meu Livro, além de uma tela modal para Edição.
+* **UI/UX Polido:** A interface utiliza notificações "toast" (via `react-native-toast-message`) para feedback, `useFocusEffect` para atualização de dados em tempo real, e componentes `<LoadingSpinner>` reutilizáveis para estados de carregamento.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You'll also find options to open the app's developer menu, reload the app, and more.
+## 💻 Tecnologias Utilizadas
 
-#### Web
+* **React Native**
+* **Expo (SDK 50+)**
+* **Expo Router** (para navegação baseada em arquivos)
+* **Expo SQLite (Nova API Async)**
+* **TypeScript**
+* **React Native Toast Message**
 
-Web previews will be started and managred automatically. Use the toolbar to manually refresh.
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🏃 Como Rodar o Projeto
 
-## Get a fresh project
+1.  Clone o repositório.
+2.  Navegue até a pasta `mobile/app` (ou a pasta que contém o `package.json` do mobile).
+3.  Instale as dependências: `npx expo install` (ou `npm install`)
+4.  Inicie o servidor de desenvolvimento: `npx expo start`
+5.  Escaneie o QR code com o aplicativo **Expo Go** no seu celular.
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+*Observação: Se estiver rodando em um ambiente de nuvem (como o Firebase Studio), use `npx expo start --tunnel`.*
