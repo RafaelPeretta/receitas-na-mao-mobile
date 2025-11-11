@@ -1,28 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  Button,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-  ActivityIndicator
+import { 
+  View, Text, FlatList, Image, Button, 
+  StyleSheet, SafeAreaView, Alert, ActivityIndicator 
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-
-// Importa as funções do banco e a interface
+import { useFocusEffect } from 'expo-router'; 
 import { getReceitasSalvas, deletarReceita, Receita } from '../../database/db';
-
-// **** IMPORTAÇÃO CORRIGIDA (Nomeada) ****
-import { styles as buscaStyles } from './busca';
+import { styles as buscaStyles } from './busca'; // Importa estilos
+import Toast from 'react-native-toast-message'; // 1. IMPORTAR O TOAST
 
 export default function MeuLivroScreen() {
   const [receitasSalvas, setReceitasSalvas] = useState<Receita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para carregar as receitas do DB
+  // ... (função carregarReceitas continua a mesma) ...
   const carregarReceitas = async () => {
     setIsLoading(true);
     console.log("Carregando receitas salvas (Mobile)...");
@@ -37,53 +27,64 @@ export default function MeuLivroScreen() {
     }
   };
 
-  // Hook useFocusEffect para recarregar ao focar na aba
   useFocusEffect(
     React.useCallback(() => {
       carregarReceitas();
     }, [])
   );
 
-  // Função para deletar uma receita
   const handleDeletar = async (id: string, nome: string) => {
+    // 1. MANTEMOS O ALERT DE CONFIRMAÇÃO (isso é uma boa UX)
     Alert.alert(
       'Confirmar Exclusão',
       `Tem certeza que quer deletar a receita "${nome}"?`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Deletar',
-          style: 'destructive',
+        { 
+          text: 'Deletar', 
+          style: 'destructive', 
           onPress: async () => {
             console.log("Deletando receita (Mobile):", id);
             try {
               await deletarReceita(id);
-              Alert.alert('Sucesso!', `Receita "${nome}" deletada!`);
-              await carregarReceitas();
+              
+              // 2. SUBSTITUIR O 'Alert' de sucesso por 'Toast'
+              Toast.show({
+                type: 'success',
+                text1: 'Sucesso!',
+                text2: `Receita "${nome}" deletada!`
+              });
+              
+              await carregarReceitas(); 
             } catch (error) {
               console.error("Erro ao deletar (Tela Meu Livro):", error);
               Alert.alert('Erro', 'Não foi possível deletar a receita.');
+              // Ou podemos usar um toast de erro:
+              // Toast.show({
+              //   type: 'error',
+              //   text1: 'Erro',
+              //   text2: 'Não foi possível deletar a receita.'
+              // });
             }
-          }
+          } 
         }
       ]
     );
   };
 
-  // Componente para renderizar cada item da lista
+  // ... (função renderReceitaSalvaCard e o return) ...
+  // (Nenhuma mudança necessária no resto do arquivo)
   const renderReceitaSalvaCard = ({ item }: { item: Receita }) => (
-    // Usa a variável 'buscaStyles' normalmente
-    <View style={buscaStyles.receitaCard}>
-      <Image
-        source={{ uri: item.imagemUrl }}
-        style={buscaStyles.receitaImagem}
+    <View style={buscaStyles.receitaCard}> 
+      <Image 
+        source={{ uri: item.imagemUrl }} 
+        style={buscaStyles.receitaImagem} 
       />
       <Text style={buscaStyles.receitaTitulo}>{item.nome}</Text>
-
-      {/* Botão Deletar */}
+      
       <View style={styles.buttonContainer}>
-         <Button
-            title="Remover Receita"
+         <Button 
+            title="Remover Receita" 
             onPress={() => handleDeletar(item.id, item.nome)}
             color="#ff4d4d" // Vermelho
           />
@@ -91,7 +92,6 @@ export default function MeuLivroScreen() {
     </View>
   );
 
-  // Interface da Tela
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -105,8 +105,8 @@ export default function MeuLivroScreen() {
           <FlatList
             data={receitasSalvas}
             renderItem={renderReceitaSalvaCard}
-            keyExtractor={(item) => item.id}
-            style={buscaStyles.list}
+            keyExtractor={(item) => item.id} 
+            style={buscaStyles.list} 
           />
         )}
       </View>
@@ -114,7 +114,7 @@ export default function MeuLivroScreen() {
   );
 }
 
-// Estilos específicos desta tela (MeuLivroScreen)
+// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
-    overflow: 'hidden',
-    borderRadius: 4,
+    overflow: 'hidden', 
+    borderRadius: 4, 
   }
 });

@@ -1,38 +1,24 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  Image,
-  ActivityIndicator,
-  StyleSheet,
-  SafeAreaView,
-  Alert
+import { 
+  View, Text, TextInput, Button, FlatList, Image, 
+  ActivityIndicator, StyleSheet, SafeAreaView, Alert 
 } from 'react-native';
-
-// Importa nossas funções de API e DB
-import { buscarReceitasPorDescricao } from '../../services/api';
-import { salvarReceita } from '../../database/db';
-// Importa a interface Receita (se você quiser tipar o estado 'receitas' melhor)
-// import { Receita } from '../../database/db';
+import { buscarReceitasPorDescricao } from '../../services/api'; 
+import { salvarReceita } from '../../database/db'; 
+import Toast from 'react-native-toast-message'; // 1. IMPORTAR O TOAST
 
 export default function BuscaScreen() {
-  // 1. Estados
   const [termo, setTermo] = useState('');
-  const [receitas, setReceitas] = useState<any[]>([]); // Array para os resultados da API
+  const [receitas, setReceitas] = useState<any[]>([]); 
   const [isLoading, setIsLoading] = useState(false);
   const [mensagem, setMensagem] = useState('');
 
-  // 2. Função para buscar na API
   const handleBuscar = async () => {
+    // ... (função de busca continua a mesma) ...
     if (termo.trim() === '') return;
-
     setIsLoading(true);
     setReceitas([]);
     setMensagem('');
-
     try {
       const resultados = await buscarReceitasPorDescricao(termo);
       if (resultados.length > 0) {
@@ -48,64 +34,75 @@ export default function BuscaScreen() {
     }
   };
 
-  // 3. Função para salvar no Banco de Dados
   const handleSalvarReceita = async (receitaAPI: any) => {
     console.log("Salvando receita (Mobile):", receitaAPI.strMeal);
     try {
       await salvarReceita(receitaAPI);
-      Alert.alert('Sucesso!', `Receita "${receitaAPI.strMeal}" salva no seu Livro!`);
+      
+      // 2. SUBSTITUIR O 'Alert' por 'Toast'
+      Toast.show({
+        type: 'success', // Tipo de toast (verde)
+        text1: 'Sucesso!',
+        text2: `Receita "${receitaAPI.strMeal}" salva no seu Livro!`
+      });
+
     } catch (error) {
       console.error("Erro ao salvar (Tela Busca):", error);
-      Alert.alert('Erro', 'Não foi possível salvar a receita.');
+      
+      // Para erros, o Alert ainda é uma boa opção
+      Alert.alert('Erro', 'Não foi possível salvar a receita.'); 
+      
+      // Ou podemos usar um toast de erro:
+      // Toast.show({
+      //   type: 'error',
+      //   text1: 'Erro',
+      //   text2: 'Não foi possível salvar a receita.'
+      // });
     }
   };
 
-  // 4. Componente para renderizar cada item da lista (Card da Receita)
+  // ... (função renderReceitaCard e o return) ...
+  // (Nenhuma mudança necessária no resto do arquivo)
   const renderReceitaCard = ({ item }: { item: any }) => (
     <View style={styles.receitaCard}>
-      <Image
-        source={{ uri: item.strMealThumb }}
-        style={styles.receitaImagem}
+      <Image 
+        source={{ uri: item.strMealThumb }} 
+        style={styles.receitaImagem} 
       />
       <Text style={styles.receitaTitulo}>{item.strMeal}</Text>
       <Text style={styles.receitaIngredientes}>
         Ingredientes: {item.strIngredient1}, {item.strIngredient2}, {item.strIngredient3}...
       </Text>
       <View style={styles.buttonContainer}>
-          <Button
-            title="Salvar no meu Livro"
+          <Button 
+            title="Salvar no meu Livro" 
             onPress={() => handleSalvarReceita(item)}
-            color="#99CC33" // Verde limão
+            color="#99CC33" 
           />
       </View>
     </View>
   );
 
-  // 5. Interface da Tela
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Buscar Receitas</Text>
-
         <View style={styles.inputContainer}>
-          <TextInput
+          <TextInput 
             style={styles.input}
             placeholder="Digite o nome do prato (ex: Chicken)"
             value={termo}
             onChangeText={setTermo}
           />
-          <Button
+          <Button 
             title={isLoading ? 'Buscando...' : 'Buscar'}
-            onPress={handleBuscar}
+            onPress={handleBuscar} 
             disabled={isLoading}
-            color="#003366" // Azul
+            color="#003366" 
           />
         </View>
-
         {isLoading && <ActivityIndicator size="large" color="#003366" style={{ marginVertical: 20 }} />}
-
         {mensagem && !isLoading && <Text style={styles.mensagem}>{mensagem}</Text>}
-
         <FlatList
           data={receitas}
           renderItem={renderReceitaCard}
@@ -117,7 +114,7 @@ export default function BuscaScreen() {
   );
 }
 
-// 6. Estilos (Agora exportado)
+// Estilos
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
